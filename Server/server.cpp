@@ -129,7 +129,7 @@ int main() {
 			//	});
 
 			handleClient(clientSocket);
-			closesocket(clientSocket);
+			close_socket(clientSocket);
 
 			cout << "Соединение с клиентом закрыто" << endl;
 
