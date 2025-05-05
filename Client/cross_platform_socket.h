@@ -34,7 +34,7 @@ using namespace std;
 #include <mutex>
 #include <atomic>
 #include <memory>
-
+#include <algorithm>
 
 inline void init_network() {
 #ifdef _WIN32

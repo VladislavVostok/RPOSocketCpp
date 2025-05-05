@@ -35,6 +35,7 @@ using namespace std;
 #include <atomic>
 #include <memory>
 #include <sstream>
+#include <algorithm>
 
 inline void init_network() {
 #ifdef _WIN32
