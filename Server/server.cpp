@@ -144,7 +144,7 @@ int main() {
 			clientThreads.emplace_back(handleClient, clientSocket);
 
 			clientThreads.erase(
-				std::remove_if(clientThreads.begin(), clientThreads.end(), [](std::thread& t) {
+				remove_if(clientThreads.begin(), clientThreads.end(), [](std::thread& t) {
 					if (t.joinable()) {
 						t.join();
 						return true;

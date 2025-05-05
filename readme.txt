@@ -1,0 +1,1 @@
+g++ server.cpp -o server -std=ñ++17 -pthread
