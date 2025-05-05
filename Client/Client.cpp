@@ -21,7 +21,7 @@ int main()
 		serverAddr.sin_family = AF_INET;
 		serverAddr.sin_port = htons(5555);
 
-		if (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr) <= 0) {
+		if (inet_pton(AF_INET, "45.139.78.128", &serverAddr.sin_addr) <= 0) {
 			throw runtime_error("Неверный адрес сервера");
 		}
 

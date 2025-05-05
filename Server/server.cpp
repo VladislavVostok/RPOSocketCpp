@@ -1,9 +1,10 @@
 #include "cross_platform_sockets.h"
 #include "product.h"
-#include <thread>
-#include <sstream>
 
 using namespace std;
+
+mutex dbMutex;
+atomic<bool> serverRuning(true);
 
 map<int, Product> productDatabase = {
 
@@ -15,7 +16,13 @@ map<int, Product> productDatabase = {
 };
 
 string processRequest(const string& request) {
+
+	
+
 	if (request == "LIST_ALL") {
+
+		lock_guard<mutex> lock(dbMutex);
+		
 		if (productDatabase.empty()) {
 			return "ERROR|DB is empty";
 		}
@@ -28,6 +35,11 @@ string processRequest(const string& request) {
 		return response;
 	}
 	else if (request.rfind("GET ", 0) == 0) {
+
+		if (productDatabase.empty()) {
+			return "ERROR|DB is empty";
+		}
+
 		int productId;
 		try {
 			productId = stoi(request.substr(4));
@@ -35,6 +47,9 @@ string processRequest(const string& request) {
 		catch (...) {
 			return "ERROR|Неверный формат ID товара";
 		}
+
+		lock_guard<mutex> lock(dbMutex);
+
 
 		auto it = productDatabase.find(productId);
 		if (it == productDatabase.end()) {
@@ -52,11 +67,13 @@ string processRequest(const string& request) {
 void handleClient(int clientSocket) {
 	try {
 		char buffer[1024] = { 0 };
+
 		while (true) {
 			int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
 			check_socket_error(bytesRead, "Ошибка чтения данных");
 
 			if (bytesRead <= 0) {
+				closesocket(clientSocket);
 				return;
 			}
 
@@ -71,14 +88,19 @@ void handleClient(int clientSocket) {
 			cout << "Отправлен ответ: " << response.size() << " байт" << endl;
 		}
 
-	}catch(const exception& e){
+	}
+	catch(const exception& e){
 		cerr << "Ошибка обработки " << e.what() << endl;
 	}
+	// TODO: Добавить команду отключения от сервера
+	closesocket(clientSocket);
 }
 
 int main() {
 
 	setlocale(LC_ALL, "");
+	std::vector<std::thread> clientThreads;
+
 	try {
 
 		init_network();
@@ -98,16 +120,14 @@ int main() {
 		check_socket_error(setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&opt, sizeof(opt)), "Installing error SO_REUSEDADDR");
 	#else
 		check_socket_error(setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)), "Installing error SO_REUSEDADDR");
-	#endif
+	#endif+
 
 		check_socket_error(bind(serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)), "bindin socket error!");
 		check_socket_error(listen(serverSocket, 10), "listening socket error!");
 
 		cout << "Server started on 5555 port" << endl;
 
-		while (true) {
-			
-
+		while (serverRuning) {
 			sockaddr_in clientAddr;
 			socklen_t clientAddrLen = sizeof(clientAddr);
 			int clientSocket = accept(serverSocket, (sockaddr*)&clientAddr, &clientAddrLen);
@@ -121,21 +141,31 @@ int main() {
 			inet_ntop(AF_INET, &clientAddr.sin_addr, clientIP, INET_ADDRSTRLEN);
 			cout << "New connect from " << clientIP << ":" << ntohs(clientAddr.sin_port) << endl;
 			
-			// Функция обработки клиентских запросов
-			//std::thread t1([&]()
-			//	{
-			//		handleClient(clientSocket);
-			//		closesocket(clientSocket);
-			//	});
+			clientThreads.emplace_back(handleClient, clientSocket);
 
-			handleClient(clientSocket);
-			close_socket(clientSocket);
-
-			cout << "Соединение с клиентом закрыто" << endl;
-
+			clientThreads.erase(
+				std::remove_if(clientThreads.begin(), clientThreads.end(), [](std::thread& t) {
+					if (t.joinable()) {
+						t.join();
+						return true;
+					}
+					return false;
+					}),
+				clientThreads.end()
+			);
 		}
 
 		close_socket(serverSocket);
+
+
+
+		for (auto& thread : clientThreads) {
+			if (thread.joinable()) {
+				thread.join();
+			}
+		}
+
+
 		cleanup_network();
 	}
 	catch (const exception& e) {

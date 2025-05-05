@@ -30,6 +30,11 @@ using namespace std;
 #include <vector>
 #include <cstring>
 #include <stdexcept>
+#include <thread>
+#include <mutex>
+#include <atomic>
+#include <memory>
+
 
 inline void init_network() {
 #ifdef _WIN32
