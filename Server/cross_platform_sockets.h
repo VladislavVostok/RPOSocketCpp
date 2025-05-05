@@ -6,6 +6,8 @@ using namespace std;
 
 
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
@@ -13,6 +15,7 @@ using namespace std;
 #define socklen_t int
 #define SHUT_RDWR SD_BOTH
 #define MSG_NOSIGNAL 0
+#define bind_socket bind
 
 #else
 #include <sys/socket.h>
@@ -22,6 +25,7 @@ using namespace std;
 #define close_socket close
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
+#define bind_socket bind
 #endif
 
 #include <iostream>
@@ -36,6 +40,7 @@ using namespace std;
 #include <memory>
 #include <sstream>
 #include <algorithm>
+
 
 inline void init_network() {
 #ifdef _WIN32
