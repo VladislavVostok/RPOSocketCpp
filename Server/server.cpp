@@ -73,7 +73,7 @@ void handleClient(int clientSocket) {
 			check_socket_error(bytesRead, "Ошибка чтения данных");
 
 			if (bytesRead <= 0) {
-				closesocket(clientSocket);
+				close_socket(clientSocket);
 				return;
 			}
 
@@ -93,7 +93,7 @@ void handleClient(int clientSocket) {
 		cerr << "Ошибка обработки " << e.what() << endl;
 	}
 	// TODO: Добавить команду отключения от сервера
-	closesocket(clientSocket);
+	close_socket(clientSocket);
 }
 
 int main() {
