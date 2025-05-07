@@ -1,6 +1,6 @@
 #include "cross_platform_sockets.h"
 #include "product.h"
-#include <future>
+//#include <future>
 
 using namespace std;
 
@@ -101,7 +101,8 @@ int main() {
 
 	setlocale(LC_ALL, "");
 	std::vector<std::thread> clientThreads;
-	vector<future<void>> clientFutures;
+	//vector<future<void>> clientFutures;
+
 	try {
 
 		init_network();
@@ -112,8 +113,8 @@ int main() {
 		sockaddr_in serverAddr;
 		serverAddr.sin_family = AF_INET;
 		serverAddr.sin_addr.s_addr = INADDR_ANY;   // localhost 127.0.0.1
-		//inet_pton(AF_INET, "45.139.78.128", &serverAddr.sin_addr);
-		serverAddr.sin_port = htons(5555);
+		inet_pton(AF_INET, "45.139.78.128", &serverAddr.sin_addr);
+		//serverAddr.sin_port = htons(5555);
 
 		int opt = 1;
 
@@ -142,23 +143,27 @@ int main() {
 			inet_ntop(AF_INET, &clientAddr.sin_addr, clientIP, INET_ADDRSTRLEN);
 			cout << "New connect from " << clientIP << ":" << ntohs(clientAddr.sin_port) << endl;
 			
-			//clientThreads.emplace_back([clientSocket]() { handleClient(clientSocket); });
-			clientFutures.emplace_back(
-				std::async(std::launch::async, [clientSocket]() {
-					handleClient(clientSocket);
-					})
-			);
-			clientThreads.erase(
-				std::remove_if(clientThreads.begin(), clientThreads.end(), [](std::thread& t) {
-					if (t.joinable()) {
-						t.join();
-						return true;
-					}
-					return false;
-					}),
-				clientThreads.end()
-			);
+			clientThreads.emplace_back([clientSocket]() { handleClient(clientSocket); });
 		}
+
+
+
+		//clientFutures.emplace_back(
+		//	std::async(std::launch::async, [clientSocket]() {
+		//		handleClient(clientSocket);
+		//		})
+		//);
+
+		//clientThreads.erase(
+		//	std::remove_if(clientThreads.begin(), clientThreads.end(), [](std::thread& t) {
+		//		if (t.joinable()) {
+		//			t.join();
+		//			return true;
+		//		}
+		//		return false;
+		//		}),
+		//	clientThreads.end()
+		//);
 
 		close_socket(serverSocket);
 
