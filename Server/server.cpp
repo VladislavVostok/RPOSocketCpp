@@ -112,9 +112,9 @@ int main() {
 
 		sockaddr_in serverAddr;
 		serverAddr.sin_family = AF_INET;
-		serverAddr.sin_addr.s_addr = INADDR_ANY;   // localhost 127.0.0.1
+		//serverAddr.sin_addr.s_addr = INADDR_ANY;   // localhost 127.0.0.1
 		inet_pton(AF_INET, "45.139.78.128", &serverAddr.sin_addr);
-		//serverAddr.sin_port = htons(5555);
+		serverAddr.sin_port = htons(5555);
 
 		int opt = 1;
 
