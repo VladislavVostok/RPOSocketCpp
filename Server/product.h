@@ -31,6 +31,16 @@ struct Product
 		p.category = str.substr(pos4 + 1);
 		return p;
 	}
+
+	void validate() {
+		if (id <= 0) throw invalid_argument("ID товара должен быть положительным!");
+		if (name.empty()) throw invalid_argument("Ќазвание товара не должно быть пустым!");
+		if (price <= 0) throw invalid_argument("÷ена товара должна быть положительной!");
+		if (quantity <= 0) throw invalid_argument(" оличество товара не должен быть отрицательным!");
+		if (category.empty()) throw invalid_argument(" атегори€ товара не может быть пустой!");
+
+	}
+
 };
 
 

@@ -37,7 +37,9 @@ int main()
 			cout << "\nМеню:" << endl;
 			cout << "1. Получить список всех товаров." << endl;
 			cout << "2. Получить информацию от товаре по ID" << endl;
-			cout << "3. Выход" << endl;
+			cout << "3. Добавление нового товара (с указанием ID)" << endl;
+			cout << "4. Добавление нового товара (авто-генерацией ID)" << endl;
+			cout << "5. Выход" << endl;
 
 			int choice;
 			cin >> choice;
@@ -55,6 +57,14 @@ int main()
 				request = "GET " + to_string(id);
 			}
 			else if (choice == 3) {
+				Product p = Product::input_product(true);
+				request = "ADD " + p.to_string_custom();
+			}
+			else if (choice == 4) {
+				Product p = Product::input_product(false);
+				request = "ADD_AUTOID " + p.to_string_custom();
+			}
+			else if (choice == 5) {
 				request = "EXIT";
 			}
 			else {

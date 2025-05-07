@@ -39,6 +39,38 @@ struct Product
 		cout << "Количество: " << this->quantity << endl;
 		cout << "Категория: " << this->category << endl;	
 	}
+
+	void validate() {
+		if (id <= 0) throw invalid_argument("ID товара должен быть положительным!");
+		if (name.empty()) throw invalid_argument("Название товара не должно быть пустым!");
+		if (price <= 0) throw invalid_argument("Цена товара должна быть положительной!");
+		if (quantity <= 0) throw invalid_argument("Количество товара не должен быть отрицательным!");
+		if (category.empty()) throw invalid_argument("Категория товара не может быть пустой!");
+
+	}
+
+	static Product input_product(bool requiredId = true) {
+		Product p;
+		
+		if (requiredId) {
+			cout << "Введите ID товара: ";
+			cin >> p.id;
+		}
+
+		cout << "Введите наименование товара: ";
+		cin >> p.name;
+
+		cout << "Введите цену товара: ";
+		cin >> p.price;
+
+		cout << "Введите количество товара: ";
+		cin >> p.quantity;
+
+		cout << "Введите категорию товара: ";
+		cin >> p.category;
+
+		return p;
+	}
 };
 
 

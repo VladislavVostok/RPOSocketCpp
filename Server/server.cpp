@@ -8,22 +8,26 @@ mutex dbMutex;
 atomic<bool> serverRuning(true);
 
 map<int, Product> productDatabase = {
-
 	{ 1, {1, "Ноутбук Lenovo IdeaPad", 54999.99, 12, "Ноутбуки"} },
 	{ 2, {2, "Смарфон Xiaomi Redmi Note", 24999.50, 34, "Смартфоны"} },
 	{ 3, {3, "Наушники", 19999.99, 8, "Аксессуары"} },
 	{ 4, {4, "Монитор LG 328y547", 42999.95, 7, "Мониторы"} },
-
 };
+
+int generateProductId() {
+	lock_guard<mutex> lock(dbMutex);
+	if (productDatabase.empty()) return 1;
+
+	return productDatabase.rbegin()->first + 1;
+}
 
 string processRequest(const string& request) {
 
-	
-
+#pragma region LIST_ALL
 	if (request == "LIST_ALL") {
 
 		lock_guard<mutex> lock(dbMutex);
-		
+
 		if (productDatabase.empty()) {
 			return "ERROR|DB is empty";
 		}
@@ -35,6 +39,8 @@ string processRequest(const string& request) {
 		}
 		return response;
 	}
+#pragma endregion
+#pragma region GET
 	else if (request.rfind("GET ", 0) == 0) {
 
 		if (productDatabase.empty()) {
@@ -60,10 +66,51 @@ string processRequest(const string& request) {
 		return "OK|" + it->second.to_string_custom();
 
 	}
+#pragma endregion
+#pragma region ADD
+	else if (request.rfind("ADD", 0) == 0) {
+		try {
+			Product p = Product::from_string(request.substr(4));
+			p.validate();
+
+			lock_guard<mutex> lock(dbMutex);
+			if (productDatabase.count(p.id)) {
+				return "ERROR|Товар с ID " + to_string(p.id) + " уже существует.";
+			}
+
+			productDatabase[p.id] = p;
+			return "OK|Товар успешно добавлен. ID: " + to_string(p.id);
+
+		}
+		catch (const exception& e) {
+			return "ERROR|" + string(e.what());
+		}
+	}
+#pragma endregion
+#pragma region ADD_AUTOID
+	else if (request.rfind("ADD_AUTOID", 0) == 0) {
+		try {
+			Product p = Product::from_string(request.substr(11));
+			p.validate();
+
+			lock_guard<mutex> lock(dbMutex);
+			p.id = generateProductId();
+			productDatabase[p.id] = p;
+
+			return "OK|Товар успешно добавлен. ID: " + to_string(p.id);
+
+		}
+		catch (const exception& e) {
+			return "ERROR|" + string(e.what());
+		}
+	}
+#pragma endregion
+#pragma region EXIT
 	else if (request == "EXIT") {
 		cout << "Клиент отключился по запросу!" << endl;
 		return "EXITED";
 	}
+#pragma endregion
 
 	return "ERROR|Неизвестная команда";
 
