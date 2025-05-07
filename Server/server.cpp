@@ -60,6 +60,10 @@ string processRequest(const string& request) {
 		return "OK|" + it->second.to_string_custom();
 
 	}
+	else if (request == "EXIT") {
+		cout << "Клиент отключился по запросу!" << endl;
+		return "EXITED";
+	}
 
 	return "ERROR|Неизвестная команда";
 
@@ -83,8 +87,14 @@ void handleClient(int clientSocket) {
 
 			string response = processRequest(request);
 
+
+
 			int byteSent = send(clientSocket, response.c_str(), response.size(), MSG_NOSIGNAL);
 			check_socket_error(byteSent, "Данные клиенту не отправлены.");
+
+			if (response == "EXITED") {
+				break;
+			}
 
 			cout << "Отправлен ответ: " << response.size() << " байт" << endl;
 		}

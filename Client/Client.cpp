@@ -55,7 +55,7 @@ int main()
 				request = "GET " + to_string(id);
 			}
 			else if (choice == 3) {
-				break;
+				request = "EXIT";
 			}
 			else {
 				cout << "Неверный выбор!" << endl;
@@ -84,6 +84,10 @@ int main()
 			else if (response.rfind("OK|", 0) == 0) {
 				Product p = Product::from_string(response.substr(3));
 				p.print();
+			}
+			else if (response == "EXITED") {
+				cout << "Всего хорошого!";
+				break;
 			}
 			else {
 				vector<string> products = split(response, '\n');
