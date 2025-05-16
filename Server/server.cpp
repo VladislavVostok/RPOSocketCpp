@@ -7,6 +7,8 @@ using namespace std;
 mutex dbMutex;
 atomic<bool> serverRuning(true);
 
+
+//dfgdg
 map<int, Product> productDatabase = {
 	{ 1, {1, "Ноутбук Lenovo IdeaPad", 54999.99, 12, "Ноутбуки"} },
 	{ 2, {2, "Смарфон Xiaomi Redmi Note", 24999.50, 34, "Смартфоны"} },
